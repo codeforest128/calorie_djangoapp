@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+    <meta charset="UTF-8">
+    <title>calorie</title>
+    <style>
+        body {
+          background: rgba(52, 95, 144, 0.07);
+          font-family: 'Roboto', sans-serif;
+          font-weight: 300;
+          font-size: 16px;
+          line-height: 1.66667;
+        }
+
+        .container {
+          width: 50%;
+          margin: 3rem auto;
+        }
+
+        h2 {
+          color: #345F90;
+          font-size: 24px;
+          line-height: 1.25;
+          font-family: "Roboto Slab", serif;
+          margin-top: 20px;
+          margin-bottom: 20px;
+        }
+
+        .tab-slider--nav {
+          width: 100%;
+          float: left;
+          margin-bottom: 20px;
+        }
+
+        .tab-slider--tabs {
+          display: block;
+          float: left;
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          position: relative;
+          border-radius: 35px;
+          overflow: hidden;
+          background: #fff;
+          height: 35px;
+          -webkit-user-select: none;
+             -moz-user-select: none;
+              -ms-user-select: none;
+                  user-select: none;
+        }
+        .tab-slider--tabs:after {
+          content: "";
+          width: 50%;
+          background: #345F90;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          -webkit-transition: all 250ms ease-in-out;
+          transition: all 250ms ease-in-out;
+          border-radius: 35px;
+        }
+        .tab-slider--tabs.slide:after {
+          left: 50%;
+        }
+
+        .tab-slider--trigger {
+          font-size: 12px;
+          line-height: 1;
+          font-weight: bold;
+          color: #345F90;
+          text-transform: uppercase;
+          text-align: center;
+          padding: 11px 20px;
+          position: relative;
+          z-index: 2;
+          cursor: pointer;
+          display: inline-block;
+          -webkit-transition: color 250ms ease-in-out;
+          transition: color 250ms ease-in-out;
+          -webkit-user-select: none;
+             -moz-user-select: none;
+              -ms-user-select: none;
+                  user-select: none;
+        }
+        .tab-slider--trigger.active {
+          color: #fff;
+        }
+
+        .tab-slider--body {
+          margin-bottom: 20px;
+        }
+
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <br>
+        <div class="row" style="display: flex;float:right; margin-right:5px;">
+            <a href="{% url 'account_logout' %}"><button type="button" class="btn btn-danger">Log Out</button></a>
+        </div>
+        <br>
+        <br>
+        <div class="row" style="display: flex;justify-content: space-between;align-items: center;">
+            <h4>User: {{ user.email }}</h4>
+        </div>
+        <br>
+        <br>
+        <div class="tab-slider--nav">
+            <ul class="tab-slider--tabs">
+                <li class="tab-slider--trigger active" rel="tab1">Enter Calories</li>
+                <li class="tab-slider--trigger" rel="tab2">Calorie Details</li>
+            </ul>
+        </div>
+        <br>
+        <div class="tab-slider--container">
+            <div id="tab1" class="tab-slider--body">
+                <form action = "save_calorie/" method ="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="form-group col-6">
+                            <label><b>Calories</b></label>
+                            <input type="number" class="form-control" id="totalcalorie" name="totalcalorie" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label><b>Date</b></label>
+                            <input type="date" class="form-control" id="pubdate" name="pubdate" required>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                        <label><b>Enter Calorie Data:</b></label>
+                        <textarea class="form-control" id="caloriedata" rows="5" placeholder="Enter Calorie Data in Here"></textarea>
+                    </div>
+                    <br>
+                    <button type="button" id="clear" class="btn btn-primary">Clear</button>
+                    <button type="button" id="calculate" class="btn btn-primary">Calculate</button>
+                    <button type="submit" class="btn btn-primary">Enter</button>
+                </form>
+            </div>
+            <div id="tab2" class="tab-slider--body">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">No</th>
+                      <th scope="col">Calories</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {%if caloriedata%}
+                        {%  for caloriedata in caloriedata %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{caloriedata.calorie}}</td>
+                                <td>{{caloriedata.pub_date}}</td>
+                                <td><a style="color:red" href="delete/{{caloriedata.id}}/">Delete</a></td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    $("document").ready(function(){
+      $(".tab-slider--body").hide();
+      $(".tab-slider--body:first").show();
+    });
+
+    $(".tab-slider--nav li").click(function() {
+      $(".tab-slider--body").hide();
+      var activeTab = $(this).attr("rel");
+      $("#"+activeTab).fadeIn();
+        if($(this).attr("rel") == "tab2"){
+            $('.tab-slider--tabs').addClass('slide');
+        }else{
+            $('.tab-slider--tabs').removeClass('slide');
+        }
+      $(".tab-slider--nav li").removeClass("active");
+      $(this).addClass("active");
+    });
+
+    $('#clear').click(function() {
+        $('#caloriedata').val("");
+        $('#totalcalorie').val("");
+    });
+
+    $('#calculate').click(function() {
+        var caloriedata = $('#caloriedata').val();
+        var multiple = caloriedata.indexOf('*');
+        var division = caloriedata.indexOf('/');
+        if( multiple > -1 || division > -1) alert("input only + and -")
+        else {
+            var calorie = caloriedata.split('+');
+            var totalcalorie = 0;
+            for(var i = 0; i < calorie.length; i++)
+            {
+                var minus = calorie[i].indexOf('-');
+                var minuscalorie = 0;
+                console.log(minus);
+                if( minus > -1 ){
+                    var calorie1 = calorie[i].split('-');
+                    for(var j = 0; j < calorie1.length; j++)
+                    {
+                        if(j == 0) {
+                            minuscalorie = parseInt(calorie1[0], 10);
+                            console.log(minuscalorie);
+                        }
+                        else {
+                            minuscalorie -= parseInt(calorie1[j], 10);
+                        }
+                    }
+                    calorie[i] = minuscalorie;
+                }
+
+                calorie[i] = parseInt(calorie[i], 10);
+                totalcalorie += calorie[i];
+            }
+            if(!totalcalorie) alert("Input Calorie Data correctly")
+            totalcalorie = parseInt(totalcalorie, 10);
+            $('#totalcalorie').val(totalcalorie);
+        }
+    });
+
+</script>
